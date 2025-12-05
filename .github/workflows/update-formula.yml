@@ -23,6 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update formula
         run: |
@@ -45,17 +47,21 @@ jobs:
             sed -i "s|assert_match \"wasmrun .*\", shell_output|assert_match \"wasmrun ${VERSION}\", shell_output|" Formula/${FORMULA}.rb
           fi
 
-      - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v6
-        with:
-          commit-message: "${{ github.event.client_payload.formula || github.event.inputs.formula }}: update to ${{ github.event.client_payload.version || github.event.inputs.version }}"
-          title: "${{ github.event.client_payload.formula || github.event.inputs.formula }}: update to ${{ github.event.client_payload.version || github.event.inputs.version }}"
-          body: |
-            Automated update for ${{ github.event.client_payload.formula || github.event.inputs.formula }} release ${{ github.event.client_payload.version || github.event.inputs.version }}
+      - name: Commit and push changes
+        run: |
+          FORMULA="${{ github.event.client_payload.formula || github.event.inputs.formula }}"
+          VERSION="${{ github.event.client_payload.version || github.event.inputs.version }}"
 
-            - Formula: ${{ github.event.client_payload.formula || github.event.inputs.formula }}
-            - Version: ${{ github.event.client_payload.version || github.event.inputs.version }}
-            - URL: ${{ github.event.client_payload.url || github.event.inputs.url }}
-            - SHA256: ${{ github.event.client_payload.sha256 || github.event.inputs.sha256 }}
-          branch: update-${{ github.event.client_payload.formula || github.event.inputs.formula }}-${{ github.event.client_payload.version || github.event.inputs.version }}
-          delete-branch: true
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add Formula/${FORMULA}.rb
+
+          # Only commit if there are changes
+          if ! git diff --staged --quiet; then
+            git commit -m "${FORMULA}: update to ${VERSION}"
+            git push
+            echo "✅ Successfully updated ${FORMULA} to ${VERSION}"
+          else
+            echo "ℹ️ No changes detected for ${FORMULA} ${VERSION}"
+          fi
