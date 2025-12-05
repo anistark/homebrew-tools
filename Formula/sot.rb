@@ -21,21 +21,21 @@ class Sot < Formula
 
   resource "psutil" do
     url "https://files.pythonhosted.org/packages/source/p/psutil/psutil-7.1.3.tar.gz"
-    sha256 "dba1aa92c7db5db33d0f3d42f78dc6b1e94a43b3f2bffbb53a8ea6402e2e0f55"
+    sha256 "6c86281738d77335af7aec228328e944b30930899ea760ecf33a4dba66be5e74"
   end
 
   resource "rich" do
     url "https://files.pythonhosted.org/packages/source/r/rich/rich-14.2.0.tar.gz"
-    sha256 "b13dfc53ce6c5c8f02c37ec08ec42dce1b12e950106f21b49e87659d0f3e528b"
+    sha256 "73ff50c7c0c1c77c8243079283f4edb376f0f6442433aecb8ce7e6d0b92d1fe4"
   end
 
   resource "textual" do
     url "https://files.pythonhosted.org/packages/source/t/textual/textual-5.3.0.tar.gz"
-    sha256 "07ace7d80f0bcf00d3afa11c6da0faf72e8fd90f4b6a4c00fd0a5c4ba23ec26c"
+    sha256 "1b6128b339adef2e298cc23ab4777180443240ece5c232f29b22960efd658d4d"
   end
 
   resource "markdown-it-py" do
-    url "https://files.pythonhosted.org/packages/source/m/markdown-it-py/markdown_it_py-3.0.0.tar.gz"
+    url "https://files.pythonhosted.org/packages/38/71/3b932df36c1a044d397a1f92d1cf91ee0a503d91e470cbd670aa66b07ed0/markdown-it-py-3.0.0.tar.gz"
     sha256 "e3f60a94fa066dc52ec76661e37c851cb232d92f9886b15cb560aaada2df8feb"
   end
 
