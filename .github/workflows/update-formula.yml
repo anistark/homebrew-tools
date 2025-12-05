@@ -1,0 +1,47 @@
+name: Update Formula
+
+on:
+  repository_dispatch:
+    types: [update-formula]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to update to'
+        required: true
+      sha256:
+        description: 'SHA256 hash of the tarball'
+        required: true
+      url:
+        description: 'Download URL'
+        required: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update formula
+        run: |
+          VERSION="${{ github.event.client_payload.version || github.event.inputs.version }}"
+          SHA256="${{ github.event.client_payload.sha256 || github.event.inputs.sha256 }}"
+          URL="${{ github.event.client_payload.url || github.event.inputs.url }}"
+
+          # Update the formula file
+          sed -i "s|url \".*\"|url \"${URL}\"|" Formula/sot.rb
+          sed -i "s|sha256 \".*\"|sha256 \"${SHA256}\"|" Formula/sot.rb
+          sed -i "s|assert_match \".*\", shell_output|assert_match \"${VERSION}\", shell_output|" Formula/sot.rb
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "sot: update to ${{ github.event.client_payload.version || github.event.inputs.version }}"
+          title: "sot: update to ${{ github.event.client_payload.version || github.event.inputs.version }}"
+          body: |
+            Automated update for sot release ${{ github.event.client_payload.version || github.event.inputs.version }}
+
+            - Version: ${{ github.event.client_payload.version || github.event.inputs.version }}
+            - URL: ${{ github.event.client_payload.url || github.event.inputs.url }}
+            - SHA256: ${{ github.event.client_payload.sha256 || github.event.inputs.sha256 }}
+          branch: update-sot-${{ github.event.client_payload.version || github.event.inputs.version }}
+          delete-branch: true
