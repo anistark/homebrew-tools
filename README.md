@@ -1,6 +1,6 @@
 # Homebrew Tools
 
-Custom Homebrew tap for command-line tools.
+Custom Homebrew tap for command-line tools by [@anistark](https://github.com/anistark).
 
 ## Installation
 
@@ -29,3 +29,11 @@ brew tap anistark/tools
 brew install sot
 brew install wasmrun
 ```
+
+## Development
+
+Formulae are automatically updated when new releases are published to the respective repositories.
+
+## License
+
+This tap is licensed under the [BSD 2-Clause License](LICENSE).
