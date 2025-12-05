@@ -5,6 +5,9 @@ on:
     types: [update-formula]
   workflow_dispatch:
     inputs:
+      formula:
+        description: 'Formula name (sot or wasmrun)'
+        required: true
       version:
         description: 'Version to update to'
         required: true
@@ -23,25 +26,36 @@ jobs:
 
       - name: Update formula
         run: |
+          FORMULA="${{ github.event.client_payload.formula || github.event.inputs.formula }}"
           VERSION="${{ github.event.client_payload.version || github.event.inputs.version }}"
           SHA256="${{ github.event.client_payload.sha256 || github.event.inputs.sha256 }}"
           URL="${{ github.event.client_payload.url || github.event.inputs.url }}"
 
           # Update the formula file
-          sed -i "s|url \".*\"|url \"${URL}\"|" Formula/sot.rb
-          sed -i "s|sha256 \".*\"|sha256 \"${SHA256}\"|" Formula/sot.rb
-          sed -i "s|assert_match \".*\", shell_output|assert_match \"${VERSION}\", shell_output|" Formula/sot.rb
+          sed -i "s|url \".*\"|url \"${URL}\"|" Formula/${FORMULA}.rb
+          sed -i "s|sha256 \".*\"|sha256 \"${SHA256}\"|" Formula/${FORMULA}.rb
+
+          # Update test version match for sot
+          if [ "$FORMULA" = "sot" ]; then
+            sed -i "s|assert_match \".*\", shell_output|assert_match \"${VERSION}\", shell_output|" Formula/${FORMULA}.rb
+          fi
+
+          # Update test version match for wasmrun
+          if [ "$FORMULA" = "wasmrun" ]; then
+            sed -i "s|assert_match \"wasmrun .*\", shell_output|assert_match \"wasmrun ${VERSION}\", shell_output|" Formula/${FORMULA}.rb
+          fi
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
-          commit-message: "sot: update to ${{ github.event.client_payload.version || github.event.inputs.version }}"
-          title: "sot: update to ${{ github.event.client_payload.version || github.event.inputs.version }}"
+          commit-message: "${{ github.event.client_payload.formula || github.event.inputs.formula }}: update to ${{ github.event.client_payload.version || github.event.inputs.version }}"
+          title: "${{ github.event.client_payload.formula || github.event.inputs.formula }}: update to ${{ github.event.client_payload.version || github.event.inputs.version }}"
           body: |
-            Automated update for sot release ${{ github.event.client_payload.version || github.event.inputs.version }}
+            Automated update for ${{ github.event.client_payload.formula || github.event.inputs.formula }} release ${{ github.event.client_payload.version || github.event.inputs.version }}
 
+            - Formula: ${{ github.event.client_payload.formula || github.event.inputs.formula }}
             - Version: ${{ github.event.client_payload.version || github.event.inputs.version }}
             - URL: ${{ github.event.client_payload.url || github.event.inputs.url }}
             - SHA256: ${{ github.event.client_payload.sha256 || github.event.inputs.sha256 }}
-          branch: update-sot-${{ github.event.client_payload.version || github.event.inputs.version }}
+          branch: update-${{ github.event.client_payload.formula || github.event.inputs.formula }}-${{ github.event.client_payload.version || github.event.inputs.version }}
           delete-branch: true
