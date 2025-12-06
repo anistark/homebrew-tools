@@ -332,6 +332,30 @@ def install
 end
 ```
 
+For Python packages with man pages (like `sot`):
+
+```ruby
+def install
+  virtualenv_install_with_resources
+
+  # Install man page from source tarball
+  man1.install "man/example.1"
+end
+
+test do
+  assert_match "1.0.0", shell_output("#{bin}/example --version")
+
+  # Verify man page is installed
+  assert_predicate man1/"example.1", :exist?
+end
+```
+
+**Note:** Python packages may include man pages in either:
+- **Source tarball**: `man/example.1` (install explicitly as shown above)
+- **Wheel**: `share/man/man1/example.1` (auto-installed by pip/virtualenv)
+
+The `sot` formula uses the explicit installation method to ensure the man page is always available.
+
 #### For HEAD installs (bleeding edge):
 
 ```ruby

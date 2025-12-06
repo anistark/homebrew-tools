@@ -61,9 +61,15 @@ class Sot < Formula
 
   def install
     virtualenv_install_with_resources
+
+    # Install man page
+    man1.install "man/sot.1"
   end
 
   test do
     assert_match "5.0.0", shell_output("#{bin}/sot --version")
+
+    # Verify man page is installed
+    assert_predicate man1/"sot.1", :exist?
   end
 end
