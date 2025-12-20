@@ -1,8 +1,8 @@
 class Wasmrun < Formula
   desc "WebAssembly Runtime for the command line"
   homepage "https://github.com/anistark/wasmrun"
-  url "https://static.crates.io/crates/wasmrun/wasmrun-0.14.0.crate"
-  sha256 "05c208224d69cc0caa2c9940ccb78f59aca06978b4c7dc7e110c2c9e21811427"
+  url "https://static.crates.io/crates/wasmrun/wasmrun-0.15.0.crate"
+  sha256 "0af4911c9d2c4b0fd1c3e664e03eb0fc09be52d50db73a3f2f01d3fa76353285"
   license "MIT"
 
   depends_on "rust" => :build
