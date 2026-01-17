@@ -11,12 +11,6 @@ on:
       version:
         description: 'Version to update to'
         required: true
-      sha256:
-        description: 'SHA256 hash of the tarball'
-        required: true
-      url:
-        description: 'Download URL'
-        required: true
 
 jobs:
   update:
@@ -28,26 +22,21 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: Update formula
         run: |
           FORMULA="${{ github.event.client_payload.formula || github.event.inputs.formula }}"
           VERSION="${{ github.event.client_payload.version || github.event.inputs.version }}"
-          SHA256="${{ github.event.client_payload.sha256 || github.event.inputs.sha256 }}"
-          URL="${{ github.event.client_payload.url || github.event.inputs.url }}"
 
-          # Update the formula file
-          sed -i "s|url \".*\"|url \"${URL}\"|" Formula/${FORMULA}.rb
-          sed -i "s|sha256 \".*\"|sha256 \"${SHA256}\"|" Formula/${FORMULA}.rb
+          # Make script executable
+          chmod +x .github/scripts/update_formula.py
 
-          # Update test version match for sot
-          if [ "$FORMULA" = "sot" ]; then
-            sed -i "s|assert_match \".*\", shell_output|assert_match \"${VERSION}\", shell_output|" Formula/${FORMULA}.rb
-          fi
-
-          # Update test version match for wasmrun
-          if [ "$FORMULA" = "wasmrun" ]; then
-            sed -i "s|assert_match \"wasmrun .*\", shell_output|assert_match \"wasmrun ${VERSION}\", shell_output|" Formula/${FORMULA}.rb
-          fi
+          # Run the update script
+          python3 .github/scripts/update_formula.py "$FORMULA" "$VERSION"
 
       - name: Commit and push changes
         run: |
