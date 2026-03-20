@@ -14,6 +14,7 @@ brew tap anistark/tools
 
 | Formula | Description | Install | Repository |
 |---------|-------------|---------|------------|
+| pdfk | Modern PDF password CLI | `brew install pdfk` | [anistark/pdfk](https://github.com/anistark/pdfk) |
 | sot | CLI System Observation Tool | `brew install sot` | [anistark/sot](https://github.com/anistark/sot) |
 | wasmrun | WebAssembly Runtime for the command line | `brew install wasmrun` | [anistark/wasmrun](https://github.com/anistark/wasmrun) |
 
@@ -21,11 +22,13 @@ brew tap anistark/tools
 
 ```sh
 # Tap and install in one command
+brew install anistark/tools/pdfk
 brew install anistark/tools/sot
 brew install anistark/tools/wasmrun
 
 # Or tap first, then install
 brew tap anistark/tools
+brew install pdfk
 brew install sot
 brew install wasmrun
 ```

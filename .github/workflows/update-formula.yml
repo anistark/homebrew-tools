@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       formula:
-        description: 'Formula name (sot or wasmrun)'
+        description: 'Formula name (pdfk, sot, or wasmrun)'
         required: true
       version:
         description: 'Version to update to'
