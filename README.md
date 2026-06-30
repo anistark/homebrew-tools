@@ -4,10 +4,20 @@ Custom Homebrew tap for command-line tools by [@anistark](https://github.com/ani
 
 ## Installation
 
-Tap the repository:
+Tap the repository and trust it:
 
 ```sh
 brew tap anistark/tools
+brew trust anistark/tools
+```
+
+As of [Homebrew 6.0.0](https://docs.brew.sh/Tap-Trust), non-official taps must be
+explicitly trusted before their formulae can be installed. `brew trust anistark/tools`
+trusts every current and future formula in this tap. If you prefer, trust a single
+formula instead:
+
+```sh
+brew trust --formula anistark/tools/sot
 ```
 
 ## Available Formulas
@@ -21,17 +31,23 @@ brew tap anistark/tools
 ## Usage
 
 ```sh
-# Tap and install in one command
+# Tap, trust, then install in one command
 brew install anistark/tools/pdfk
 brew install anistark/tools/sot
 brew install anistark/tools/wasmrun
 
-# Or tap first, then install
+# Or tap and trust first, then install
 brew tap anistark/tools
+brew trust anistark/tools
 brew install pdfk
 brew install sot
 brew install wasmrun
 ```
+
+> [!NOTE]
+> If `brew install` reports an untrusted tap, run `brew trust anistark/tools`
+> (or `brew trust --formula anistark/tools/<name>`) first. See
+> [Homebrew Tap Trust](https://docs.brew.sh/Tap-Trust) for details.
 
 ## Development
 
