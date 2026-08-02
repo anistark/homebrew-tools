@@ -48,9 +48,14 @@ brew install wasmrun
 ```
 
 > [!NOTE]
-> `arin` is macOS 14 (Sonoma) or later and builds from source, so it needs a Rust
-> toolchain and a couple of minutes to compile. From 0.7 it ships as a signed cask
-> instead, and the install line becomes `brew install --cask anistark/tools/arin`.
+> `arin` needs macOS 14 (Sonoma) or later, and builds from source, so it wants a Rust
+> toolchain and a couple of minutes to compile. Building locally is deliberate rather
+> than lazy: an unsigned app that was *downloaded* gets quarantined and refused by
+> Gatekeeper, while one compiled on your own machine does not.
+>
+> Once Arin ships signed and notarized it moves to a cask, and the install line becomes
+> `brew install --cask anistark/tools/arin`. The formula is removed at that point, so
+> there is only ever one build to install.
 
 > [!NOTE]
 > If `brew install` reports an untrusted tap, run `brew trust anistark/tools`
