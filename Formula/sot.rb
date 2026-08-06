@@ -3,8 +3,8 @@ class Sot < Formula
 
   desc "Command-line System Observation Tool"
   homepage "https://github.com/anistark/sot"
-  url "https://files.pythonhosted.org/packages/a6/4a/0dd99d933389166e665b9bcc42e84302866d981155e18833c844ae4e43a6/sot-6.0.1.tar.gz"
-  sha256 "bdfe41b91a53258d43798eb5cd5a034af0589f0d960c637211b5a9e29cca9cda"
+  url "https://files.pythonhosted.org/packages/64/3b/57db2a5a23b4ccca5971fad2319baf84410051858ebfe76f50b021710cd7/sot-6.1.0.tar.gz"
+  sha256 "0e9020ec4c4e22d135c4ec955d294b18c562133fd1e2719b335e2a678e5bdb5c"
   license "MIT"
 
   depends_on "python@3.12"
@@ -20,18 +20,18 @@ class Sot < Formula
   end
 
   resource "psutil" do
-    url "https://files.pythonhosted.org/packages/73/cb/09e5184fb5fc0358d110fc3ca7f6b1d033800734d34cac10f4136cfac10e/psutil-7.2.1.tar.gz"
-    sha256 "f7583aec590485b43ca601dd9cea0dcd65bd7bb21d30ef4ddbf4ea6b5ed1bdd3"
+    url "https://files.pythonhosted.org/packages/aa/c6/d1ddf4abb55e93cebc4f2ed8b5d6dbad109ecb8d63748dd2b20ab5e57ebe/psutil-7.2.2.tar.gz"
+    sha256 "0746f5f8d406af344fd547f1c8daa5f5c33dbc293bb8d6a16d80b4bb88f59372"
   end
 
   resource "rich" do
-    url "https://files.pythonhosted.org/packages/fb/d2/8920e102050a0de7bfabeb4c4614a49248cf8d5d7a8d01885fbb24dc767a/rich-14.2.0.tar.gz"
-    sha256 "73ff50c7c0c1c77c8243079283f4edb376f0f6442433aecb8ce7e6d0b92d1fe4"
+    url "https://files.pythonhosted.org/packages/c0/8f/0722ca900cc807c13a6a0c696dacf35430f72e0ec571c4275d2371fca3e9/rich-15.0.0.tar.gz"
+    sha256 "edd07a4824c6b40189fb7ac9bc4c52536e9780fbbfbddf6f1e2502c31b068c36"
   end
 
   resource "textual" do
-    url "https://files.pythonhosted.org/packages/6f/ee/620c887bfad9d6eba062dfa3b6b0e735e0259102e2667b19f21625ef598d/textual-7.3.0.tar.gz"
-    sha256 "3169e8ba5518a979b0771e60be380ab1a6c344f30a2126e360e6f38d009a3de4"
+    url "https://files.pythonhosted.org/packages/00/21/39a76b01bd5eea82a04baaca7580e105d8c59450df03998345bb2cfb307b/textual-8.2.8.tar.gz"
+    sha256 "3f106a9fbc73e39dd266c9712432087de78a6d644084c7c241d6a25c3169115b"
   end
 
   resource "markdown-it-py" do
@@ -67,7 +67,7 @@ class Sot < Formula
   end
 
   test do
-    assert_match "6.0.1", shell_output("#{bin}/sot --version")
+    assert_match "6.1.0", shell_output("#{bin}/sot --version")
 
     # Verify man page is installed
     assert_predicate man1/"sot.1", :exist?
