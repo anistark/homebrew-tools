@@ -30,10 +30,10 @@
 #
 # `url` names a git tag, Homebrew reads `version` out of that tag, and the `test` block
 # below checks the binary agrees. So the tag has to equal `[workspace.package].version` in
-# Cargo.toml, which is 0.4.1.
+# Cargo.toml, which is 0.5.0.
 #
-# It is tempting to tag the cycle instead, `v0.5.0` during the 0.5 cycle. That breaks three
-# things at once: `brew test` fails because the binary still reports 0.4.1, the release
+# It is tempting to tag the cycle instead, `v0.6.0` during the 0.6 cycle. That breaks three
+# things at once: `brew test` fails because the binary still reports 0.5.0, the release
 # workflow refuses to build because it checks the tag against the manifest, and
 # `arin-protocol` would end up republished at a version that claims nothing about the wire
 # format. Cycle numbers are planning, not releases.
@@ -43,15 +43,15 @@
 # The automation needs a release to fire on, and the first tap PR predates the first
 # release. Until then, set the checksum manually:
 #
-#   curl -sL https://github.com/anistark/arin/archive/refs/tags/v0.4.1.tar.gz | shasum -a 256
+#   curl -sL https://github.com/anistark/arin/archive/refs/tags/v0.5.0.tar.gz | shasum -a 256
 #
 # and confirm with `brew audit --strict --online anistark/tools/arin`, which fetches the url
 # and checks the checksum rather than trusting what is written next to it.
 class Arin < Formula
   desc "Annotation layer any agent can draw on"
   homepage "https://github.com/anistark/arin"
-  url "https://github.com/anistark/arin/archive/refs/tags/v0.4.1.tar.gz"
-  sha256 "639cd1478df2793f3fa778fd76e401f2088c65eac79ddff5cc329703af5b431f"
+  url "https://github.com/anistark/arin/archive/refs/tags/v0.5.0.tar.gz"
+  sha256 "11802246eadc68f90735f3a99ceb212fda49b5eabb57f11f6efa6a7263966913"
   license "MIT"
   head "https://github.com/anistark/arin.git", branch: "main"
 
@@ -62,8 +62,14 @@ class Arin < Formula
 
   def install
     # The same script the release workflow runs, so the formula cannot drift from the dmg.
-    # Unsigned deliberately: nothing here has a certificate, and an ad-hoc signature would
-    # change on every build without buying anything Gatekeeper or TCC recognises.
+    # Ad-hoc signed, because there is no certificate here and the script always signs.
+    #
+    # This comment used to say the bundle was left unsigned deliberately, on the grounds that
+    # an ad-hoc signature changes on every build and buys nothing Gatekeeper or TCC
+    # recognises. Half right. Gatekeeper does not care. TCC does: it will not keep a Screen
+    # Recording grant against a bundle whose signature does not verify, which is what
+    # skipping codesign actually produced, so every install from this formula came up asking
+    # for a permission it could never be granted. See the signing section of bundle.sh.
     system "packaging/macos/bundle.sh", "--output", "target/bundle"
 
     # The bundle rather than a bare binary, because the menu bar item, the absence of a
@@ -85,7 +91,11 @@ class Arin < Formula
 
       Or start it at login:
 
-        #{opt_prefix}/Arin.app/Contents/Resources/launch-agent.sh enable #{opt_prefix}/Arin.app
+        arin service enable
+
+      `arin service status`, `restart` and `disable` are the rest of it. Run `restart`
+      after an upgrade: the agent survives one, a running daemon does not get replaced by
+      one.
 
       Grant Screen Recording in System Settings > Privacy & Security when asked.
 
