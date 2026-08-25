@@ -20,18 +20,22 @@ formula instead:
 brew trust --formula anistark/tools/sot
 ```
 
-## Available Formulas
+## Available Formulae
 
 | Formula | Description | Install | Repository |
 |---------|-------------|---------|------------|
+| arin | Annotation layer any agent can draw on | `brew install arin` | [anistark/arin](https://github.com/anistark/arin) |
 | pdfk | Modern PDF password CLI | `brew install pdfk` | [anistark/pdfk](https://github.com/anistark/pdfk) |
 | sot | CLI System Observation Tool | `brew install sot` | [anistark/sot](https://github.com/anistark/sot) |
 | wasmrun | WebAssembly Runtime for the command line | `brew install wasmrun` | [anistark/wasmrun](https://github.com/anistark/wasmrun) |
+
+`arin` is a menu bar app built from source and requires macOS 14 (Sonoma) or newer.
 
 ## Usage
 
 ```sh
 # Tap, trust, then install in one command
+brew install anistark/tools/arin
 brew install anistark/tools/pdfk
 brew install anistark/tools/sot
 brew install anistark/tools/wasmrun
@@ -39,6 +43,7 @@ brew install anistark/tools/wasmrun
 # Or tap and trust first, then install
 brew tap anistark/tools
 brew trust anistark/tools
+brew install arin
 brew install pdfk
 brew install sot
 brew install wasmrun
