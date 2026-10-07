@@ -3,8 +3,8 @@ class Sot < Formula
 
   desc "Command-line System Observation Tool"
   homepage "https://github.com/anistark/sot"
-  url "https://files.pythonhosted.org/packages/64/3b/57db2a5a23b4ccca5971fad2319baf84410051858ebfe76f50b021710cd7/sot-6.1.0.tar.gz"
-  sha256 "0e9020ec4c4e22d135c4ec955d294b18c562133fd1e2719b335e2a678e5bdb5c"
+  url "https://files.pythonhosted.org/packages/ef/d2/3f228a0b0644b29ea30113012f6f8b0729e119e472cd97147aba615efa20/sot-6.3.0.tar.gz"
+  sha256 "b55c428c9bd5d174aa831188f545ccd4ac8e0a8aebd6bdaac661364267a694b3"
   license "MIT"
 
   depends_on "python@3.12"
@@ -67,7 +67,7 @@ class Sot < Formula
   end
 
   test do
-    assert_match "6.1.0", shell_output("#{bin}/sot --version")
+    assert_match "6.3.0", shell_output("#{bin}/sot --version")
 
     # Verify man page is installed
     assert_predicate man1/"sot.1", :exist?
