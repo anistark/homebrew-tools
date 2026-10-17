@@ -30,10 +30,10 @@
 #
 # `url` names a git tag, Homebrew reads `version` out of that tag, and the `test` block
 # below checks the binary agrees. So the tag has to equal `[workspace.package].version` in
-# Cargo.toml, which is 0.6.1.
+# Cargo.toml, which is 0.7.0.
 #
-# It is tempting to tag the cycle instead, `v0.7.0` during the 0.7 cycle. That breaks three
-# things at once: `brew test` fails because the binary still reports 0.6.1, the release
+# It is tempting to tag the cycle instead, `v0.8.0` during the 0.8 cycle. That breaks three
+# things at once: `brew test` fails because the binary still reports 0.7.0, the release
 # workflow refuses to build because it checks the tag against the manifest, and
 # `arin-protocol` would end up republished at a version that claims nothing about the wire
 # format. Cycle numbers are planning, not releases.
@@ -43,15 +43,15 @@
 # The automation needs a release to fire on, and the first tap PR predates the first
 # release. Until then, set the checksum manually:
 #
-#   curl -sL https://github.com/anistark/arin/archive/refs/tags/v0.6.1.tar.gz | shasum -a 256
+#   curl -sL https://github.com/anistark/arin/archive/refs/tags/v0.7.0.tar.gz | shasum -a 256
 #
 # and confirm with `brew audit --strict --online anistark/tools/arin`, which fetches the url
 # and checks the checksum rather than trusting what is written next to it.
 class Arin < Formula
   desc "Annotation layer any agent can draw on"
   homepage "https://github.com/anistark/arin"
-  url "https://github.com/anistark/arin/archive/refs/tags/v0.6.1.tar.gz"
-  sha256 "35d91dc3247ce5e77d9440f2177d99917facf89de7c1b014f8ffb6e9ffdb5247"
+  url "https://github.com/anistark/arin/archive/refs/tags/v0.7.0.tar.gz"
+  sha256 "1a7c13b7f377d7314e5ddb69a5c2f2414e706f7e90b95ee089096d5b810b4d4d"
   license "MIT"
   head "https://github.com/anistark/arin.git", branch: "main"
 
