@@ -12,6 +12,6 @@ class Wasmrun < Formula
   end
 
   test do
-    assert_match "0.14.0", shell_output("#{bin}/wasmrun --version")
+    assert_match "0.15.0", shell_output("#{bin}/wasmrun --version")
   end
 end

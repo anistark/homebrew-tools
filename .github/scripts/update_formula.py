@@ -42,10 +42,77 @@ def get_latest_version_matching(package: str, constraint: str) -> str:
     return data["info"]["version"]
 
 
+def fetch_crate_info(crate: str, version: str) -> Tuple[str, str]:
+    """Fetch crate download URL and SHA256 from crates.io."""
+    url = f"https://crates.io/api/v1/crates/{crate}/{version}"
+    # crates.io rejects requests without a User-Agent
+    request = urllib.request.Request(
+        url, headers={"User-Agent": "anistark/homebrew-tools update_formula.py"}
+    )
+
+    try:
+        with urllib.request.urlopen(request) as response:
+            data = json.loads(response.read())
+    except Exception as e:
+        print(f"Error fetching {crate}: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    crate_url = f"https://static.crates.io/crates/{crate}/{crate}-{version}.crate"
+    return crate_url, data["version"]["checksum"]
+
+
+def update_main_package(content: str, url: str, sha256: str) -> str:
+    """Update the class-level url and sha256, not resource blocks."""
+    content = re.sub(
+        r'(class \w+ < Formula.*?url\s+)"[^"]*"',
+        f'\\1"{url}"',
+        content,
+        count=1,
+        flags=re.DOTALL
+    )
+    content = re.sub(
+        r'(class \w+ < Formula.*?url\s+"[^"]*"\s+sha256\s+)"[^"]*"',
+        f'\\1"{sha256}"',
+        content,
+        count=1,
+        flags=re.DOTALL
+    )
+    return content
+
+
+def update_test_version(content: str, version: str) -> str:
+    """Update test version assertion."""
+    return re.sub(
+        r'(assert_match\s+)"[^"]*"(\s*,\s*shell_output)',
+        f'\\1"{version}"\\2',
+        content
+    )
+
+
+def update_crate_formula(content: str, crate: str, version: str) -> str:
+    """Update a formula built from a crates.io crate."""
+    crate_url, crate_sha256 = fetch_crate_info(crate, version)
+
+    print(f"Crate: {crate} {version}")
+    print(f"  URL: {crate_url}")
+    print(f"  SHA256: {crate_sha256}")
+
+    content = update_main_package(content, crate_url, crate_sha256)
+    return update_test_version(content, version)
+
+
 def update_formula(formula_path: str, package: str, version: str):
     """Update the Homebrew formula file."""
     with open(formula_path, 'r') as f:
         content = f.read()
+
+    # Rust formulae (pdfk, wasmrun) download from crates.io, not PyPI
+    if re.search(r'^\s*url\s+"https://static\.crates\.io/', content, re.MULTILINE):
+        content = update_crate_formula(content, package, version)
+        with open(formula_path, 'w') as f:
+            f.write(content)
+        print(f"\n✅ Successfully updated {formula_path}")
+        return
 
     # Fetch main package info
     main_data = fetch_pypi_info(package, version)
@@ -93,21 +160,7 @@ def update_formula(formula_path: str, package: str, version: str):
             print(f"Warning: Failed to fetch {dep_name}: {e}", file=sys.stderr)
 
     # Update main package URL and SHA256 (only the first occurrence)
-    # Match the class-level url and sha256, not resource blocks
-    content = re.sub(
-        r'(class \w+ < Formula.*?url\s+)"[^"]*"',
-        f'\\1"{main_url}"',
-        content,
-        count=1,
-        flags=re.DOTALL
-    )
-    content = re.sub(
-        r'(class \w+ < Formula.*?url\s+"[^"]*"\s+sha256\s+)"[^"]*"',
-        f'\\1"{main_sha256}"',
-        content,
-        count=1,
-        flags=re.DOTALL
-    )
+    content = update_main_package(content, main_url, main_sha256)
 
     # Update each resource block
     for dep_name, info in resource_updates.items():
@@ -132,12 +185,7 @@ def update_formula(formula_path: str, package: str, version: str):
                 flags=re.DOTALL | re.IGNORECASE
             )
 
-    # Update test version assertion
-    content = re.sub(
-        r'(assert_match\s+)"[^"]*"(\s*,\s*shell_output)',
-        f'\\1"{version}"\\2',
-        content
-    )
+    content = update_test_version(content, version)
 
     # Write updated content
     with open(formula_path, 'w') as f:
