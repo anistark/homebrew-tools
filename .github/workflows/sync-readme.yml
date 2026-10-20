@@ -1,0 +1,45 @@
+name: Sync README
+
+# Formula changes that don't go through update-formula.yml (e.g. arin release PRs,
+# manual edits) still need the README versions updated. Pushes made by
+# update-formula.yml use GITHUB_TOKEN and don't trigger this, so it syncs on its own.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Formula/*.rb'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Sync README versions
+        run: python3 .github/scripts/sync_readme_versions.py
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add README.md
+
+          # Only commit if there are changes
+          if ! git diff --staged --quiet; then
+            git commit -m "docs: sync formula versions in README"
+            git push
+            echo "✅ Synced README versions"
+          else
+            echo "ℹ️ README versions already up to date"
+          fi

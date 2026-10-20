@@ -38,6 +38,9 @@ jobs:
           # Run the update script
           python3 .github/scripts/update_formula.py "$FORMULA" "$VERSION"
 
+          # Keep the README formulae table in sync
+          python3 .github/scripts/sync_readme_versions.py
+
       - name: Commit and push changes
         run: |
           FORMULA="${{ github.event.client_payload.formula || github.event.inputs.formula }}"
@@ -46,7 +49,7 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add Formula/${FORMULA}.rb
+          git add Formula/${FORMULA}.rb README.md
 
           # Only commit if there are changes
           if ! git diff --staged --quiet; then

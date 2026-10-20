@@ -22,12 +22,12 @@ brew trust --formula anistark/tools/sot
 
 ## Available Formulae
 
-| Formula | Description | Install | Repository |
-|---------|-------------|---------|------------|
-| arin | Annotation layer any agent can draw on | `brew install arin` | [anistark/arin](https://github.com/anistark/arin) |
-| pdfk | Modern PDF password CLI | `brew install pdfk` | [anistark/pdfk](https://github.com/anistark/pdfk) |
-| sot | CLI System Observation Tool | `brew install sot` | [anistark/sot](https://github.com/anistark/sot) |
-| wasmrun | WebAssembly Runtime for the command line | `brew install wasmrun` | [anistark/wasmrun](https://github.com/anistark/wasmrun) |
+| Formula | Version | Description | Install | Repository |
+|---------|---------|-------------|---------|------------|
+| arin | 0.7.0 | Annotation layer any agent can draw on | `brew install arin` | [anistark/arin](https://github.com/anistark/arin) |
+| pdfk | 0.3.0 | Modern PDF password CLI | `brew install pdfk` | [anistark/pdfk](https://github.com/anistark/pdfk) |
+| sot | 6.3.0 | CLI System Observation Tool | `brew install sot` | [anistark/sot](https://github.com/anistark/sot) |
+| wasmrun | 1.0.0 | WebAssembly Runtime for the command line | `brew install wasmrun` | [anistark/wasmrun](https://github.com/anistark/wasmrun) |
 
 `arin` is a menu bar app built from source and requires macOS 14 (Sonoma) or newer.
 
