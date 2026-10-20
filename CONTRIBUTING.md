@@ -203,28 +203,47 @@ This tap uses GitHub Actions to automatically update formulae when new releases 
 
 ### How It Works
 
-1. **Release is published** in the source repository (e.g., sot, wasmrun)
-2. **GitHub Action triggers** in the source repo
-3. **Fetches package info** from PyPI or crates.io (with retry logic)
-4. **Dispatches update** to this tap repository
-5. **Formula is updated** and committed automatically to main
+1. **Release is published** in the source repository (e.g., sot, pdfk, wasmrun)
+2. **Source repo waits for the package**: its `update-homebrew.yml` retries until the new version is downloadable from PyPI or crates.io
+3. **Dispatches an `update-formula` event** to this tap with the formula name and version
+4. **`update-formula.yml` runs `.github/scripts/update_formula.py`**, which picks the registry from the formula's `url`:
+   - `static.crates.io`: reads the checksum from the crates.io API (`/api/v1/crates/<name>/<version>`)
+   - Anything else is treated as PyPI: takes the source distribution's url and sha256, and refreshes each existing `resource` block to the latest release of that dependency
+5. **Formula is rewritten**: `url`, `sha256`, and the version in the `test` block
+6. **README is synced**: `.github/scripts/sync_readme_versions.py` updates the Version column of the formulae table
+7. **Changes are committed** to main as `<formula>: update to <version>`
+
+### Formulae Updated by Pull Request
+
+`arin` builds from a GitHub tag and doesn't go through `update-formula.yml`. Its `release.yml` in [anistark/arin](https://github.com/anistark/arin) opens a pull request here with a regenerated `Formula/arin.rb`. Edit `packaging/homebrew/arin-formula.rb` in that repo instead of the copy here, since the next release overwrites it.
+
+When the pull request is merged, `sync-readme.yml` updates the README version. It runs on every push to main that touches `Formula/*.rb`, so manual formula edits are covered too.
+
+### Running an Update Manually
+
+```bash
+# Update a formula to a specific version
+gh workflow run update-formula.yml -f formula=wasmrun -f version=1.0.0
+
+# Re-sync the README versions from Formula/*.rb
+gh workflow run sync-readme.yml
+```
+
+Or use **Actions → Update Formula → Run workflow** in the GitHub UI.
+
+> [!NOTE]
+> Re-running a failed run from the Actions page reuses the commit it originally ran on. If the failure was fixed in a later commit, start a new run instead.
 
 ### Setting Up Automation for a New Formula
 
-If you want to add automation for a new formula:
+No changes to `update-formula.yml` are needed. A formula works with the update script as long as:
 
-#### 1. Add update logic to `.github/workflows/update-formula.yml`
+- The class-level `url` points at `static.crates.io` (Rust) or `files.pythonhosted.org` (PyPI source distribution)
+- The `test` block checks the version with `assert_match "<version>", shell_output(...)`. Every check in that form is rewritten to the bare new version
+- For PyPI packages, each dependency has a `resource` block named as it is on PyPI. The script only updates existing blocks, so a new dependency needs its block added by hand
+- Its row in the README formulae table has the current version in the Version column
 
-Add a new conditional block in the "Update formula" step:
-
-```bash
-# Update test version match for your-formula
-if [ "$FORMULA" = "your-formula" ]; then
-  sed -i "s|assert_match \"your-formula .*\", shell_output|assert_match \"your-formula ${VERSION}\", shell_output|" Formula/${FORMULA}.rb
-fi
-```
-
-#### 2. Create workflow in the source repository
+#### 1. Create workflow in the source repository
 
 Add `.github/workflows/update-homebrew.yml` to the source repo:
 
@@ -246,26 +265,24 @@ jobs:
           VERSION="${VERSION#v}"
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      # For crates.io packages
-      - name: Fetch crates.io package info
-        id: crates
+      - name: Wait for the package to be published
         run: |
           VERSION="${{ steps.release.outputs.version }}"
+          # For crates.io packages
           URL="https://static.crates.io/crates/your-package/your-package-${VERSION}.crate"
+          # For PyPI packages
+          # URL="https://pypi.org/pypi/your-package/${VERSION}/json"
 
-          # Retry logic with exponential backoff
+          # Retry with exponential backoff
           MAX_RETRIES=5
           RETRY_COUNT=0
           RETRY_DELAY=10
 
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             echo "Attempt $((RETRY_COUNT + 1)): Fetching $URL"
-            HTTP_CODE=$(curl -sL -w "%{http_code}" -o /tmp/package.crate "$URL")
+            HTTP_CODE=$(curl -sL -w "%{http_code}" -o /dev/null "$URL")
 
             if [ "$HTTP_CODE" = "200" ]; then
-              SHA256=$(sha256sum /tmp/package.crate | cut -d' ' -f1)
-              echo "url=$URL" >> $GITHUB_OUTPUT
-              echo "sha256=$SHA256" >> $GITHUB_OUTPUT
               exit 0
             fi
 
@@ -286,14 +303,14 @@ jobs:
               "event_type": "update-formula",
               "client_payload": {
                 "formula": "your-formula",
-                "version": "${{ steps.release.outputs.version }}",
-                "url": "${{ steps.crates.outputs.url }}",
-                "sha256": "${{ steps.crates.outputs.sha256 }}"
+                "version": "${{ steps.release.outputs.version }}"
               }
             }'
 ```
 
-#### 3. Add HOMEBREW_TAP_TOKEN secret
+Only `formula` and `version` are read from the payload. The tap looks up the url and checksum itself, so any `url` or `sha256` fields sent by older workflows are ignored.
+
+#### 2. Add HOMEBREW_TAP_TOKEN secret
 
 In the source repository settings:
 - Go to Settings → Secrets and variables → Actions
@@ -384,12 +401,18 @@ Pre-release versions use suffixes like:
 ```sh
 homebrew-tools/
 ├── .github/
+│   ├── scripts/
+│   │   ├── update_formula.py         # Rewrites a formula from crates.io or PyPI
+│   │   └── sync_readme_versions.py   # Syncs README versions from Formula/*.rb
 │   └── workflows/
-│       └── update-formula.yml    # Automated update workflow
-├── Casks/                         # For macOS applications (GUI)
-├── Formula/                       # For command-line tools
-│   ├── sot.rb                     # Example: Python package
-│   └── wasmrun.rb                 # Example: Rust package
+│       ├── update-formula.yml        # Automated update workflow
+│       └── sync-readme.yml           # README sync on formula changes
+├── Casks/                            # For macOS applications (GUI)
+├── Formula/                          # For command-line tools
+│   ├── arin.rb                       # Example: GitHub tag, updated by pull request
+│   ├── pdfk.rb                       # Example: Rust package
+│   ├── sot.rb                        # Example: Python package
+│   └── wasmrun.rb                    # Example: Rust package
 ├── .gitignore
 ├── CONTRIBUTING.md
 ├── LICENSE
